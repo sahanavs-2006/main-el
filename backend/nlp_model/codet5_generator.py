@@ -45,7 +45,7 @@ class CodeT5Generator:
         if self.pipeline:
             try:
                 result = self.pipeline(enhanced_description, max_length=max_length, truncation=True)
-                generated_text = result[0]['generated_text'] if result and 'generated_text' in result[0] else ''
+                generated_text = result[0]['generated_text'] if result and 'generated_text' in result[0] else ""
             except Exception as e:
                 logger.error(f"Local generation failed: {e}")
         
@@ -57,7 +57,6 @@ class CodeT5Generator:
                 response = requests.post(self.api_url, headers=headers, json=payload, timeout=20)
                 if response.status_code == 200:
                     res_json = response.json()
-                    # HF API returns list of dicts, or just dict depending on model
                     if isinstance(res_json, list) and len(res_json) > 0:
                         generated_text = res_json[0].get('generated_text', '')
                     elif isinstance(res_json, dict):
@@ -66,21 +65,23 @@ class CodeT5Generator:
             except Exception as e:
                 logger.error(f"HF Inference API call failed: {e}")
 
-        if not generated_text:
-            # Last resort: try heuristics anyway on empty string or return error
-            if 'error' in locals() or 'e' in locals():
-                 return {'error': 'Both local and API generation failed', 'code': ''}
-            return {'error': 'Model generation failed', 'code': ''}
-
         try:
-            
             # Clean up generated code from common hallucinations
             cleaned_code = self._clean_generated_text(generated_text)
             
             # Additional heuristic logic to ensure correctness for common patterns
             complete_code = self._complete_code_with_assignments(description, cleaned_code)
             
-            logger.info(f"Generated code locally (cleaned): {complete_code[:100]}")
+            # If both model and heuristics failed to produce code
+            if not complete_code.strip():
+                return {
+                    'error': 'Code generation failed. Please try a different description.',
+                    'code': '',
+                    'description': description,
+                    'status': 'error'
+                }
+
+            logger.info(f"Generated code (final): {complete_code[:100]}")
             return {
                 'code': complete_code,
                 'description': description,
@@ -88,34 +89,36 @@ class CodeT5Generator:
                 'status': 'success'
             }
         except Exception as e:
-            logger.error(f"Local code generation error: {str(e)}")
+            logger.error(f"Post-processing error: {str(e)}")
             return {
-                'error': f"Generation failed: {str(e)}",
+                'error': f"Generation failed during processing: {str(e)}",
                 'code': '',
                 'description': description
             }
 
     def _clean_generated_text(self, text: str) -> str:
         """
-        Clean up model hallucinations like 'def generate_python_code():' or leading dots.
+        Clean up model hallucinations like 'def generate_python_code():', Java boilerplate, or leading dots.
         """
         if not text:
             return text
             
-        # Remove common wrapper patterns
+        # Remove Java/C#/C++ wrapper patterns
+        text = re.sub(r'^[.\s]*public\s+class\s+[a-zA-Z_]\w*.*?\s*\{', '', text, flags=re.DOTALL)
+        text = re.sub(r'^[.\s]*static\s+void\s+main.*?\s*\{', '', text, flags=re.DOTALL)
+        text = re.sub(r'System\.out\.println\s*\((.*?)\);?', r'print(\1)', text)
+        
+        # Remove common Python wrapper patterns
         text = re.sub(r'^[.\s]*def\s+[a-zA-Z_]\w*\s*\(.*?\)\s*:\s*', '', text)
         text = re.sub(r'^[.\s]*class\s+[a-zA-Z_]\w*\s*:\s*', '', text)
         
         # Remove leading dots, spaces, or weird characters
         text = text.lstrip('. \n\t')
         
-        # Remove common ending junk like 'return' if it's at the end without context
-        lines = text.split('\n')
-        if lines and lines[-1].strip().startswith('return') and len(lines) > 1:
-            # If the whole thing is just one function body that was removed, 
-            # we might have kept the return. Let's see if we should keep it.
-            pass
-            
+        # Remove trailing braces if they seem like boilerplate (Java influence)
+        if text.endswith('}') and not '{' in text:
+             text = text.rstrip('} \n\t')
+             
         return text.strip()
     
     # REMOVED: _generate_with_hf_api (no longer needed for local inference)
@@ -125,9 +128,6 @@ class CodeT5Generator:
         Extract variable assignments from description and prepend to generated code.
         Handles patterns like: "Assign 5 to A", "Start sum as 0", etc.
         """
-        if not generated_code:
-            return generated_code
-            
         # Extract all assignment patterns from description
         assignments = []
         
@@ -181,6 +181,10 @@ class CodeT5Generator:
         """
         desc_lower = description.lower()
         
+        # If code looks like non-python boilerplate, ignore it
+        if ('public class' in generated_code or 'static void main' in generated_code or '{' in generated_code):
+            generated_code = ""
+
         # Find N variable from assignments (preserve case)
         actual_n_var = None
         for assignment in assignments:
@@ -365,6 +369,10 @@ class CodeT5Generator:
             if string_match:
                 return f'print("{string_match.group(1)}")'
             
+            # Simple print hello world (special case for common hallucinations)
+            if 'hello world' in desc_lower:
+                return 'print("Hello World")'
+            
             # Simple print a variable
             var_match = re.search(r'print\s+(?:the\s+)?([a-zA-Z_]\w*)', desc_lower)
             if var_match:
@@ -374,6 +382,9 @@ class CodeT5Generator:
                     code_parts = list(assignments)
                     code_parts.append(f'print({var_name})')
                     return '\n'.join(code_parts)
+                # If variable not found but it's just "print <word>", maybe it's text
+                elif ' ' not in var_name:
+                    return f'print({var_name})'
 
         # Pattern: If-condition (e.g., If a number is 10 then print it)
         if 'if' in desc_lower and ('print' in desc_lower or 'display' in desc_lower or 'output' in desc_lower):
@@ -439,6 +450,204 @@ class CodeT5Generator:
                 code_parts.append('    print(i)')
                 logger.info(f"Added generic range printing from {start_expr or 1} to {end_expr}")
                 return '\n'.join(code_parts)
+
+        # ========== NEW ENHANCED PATTERNS ==========
+        
+        # Pattern: While loop (e.g., "while x is less than 10")
+        if 'while' in desc_lower and not has_loop:
+            # Extract condition
+            condition_match = re.search(r'while\\s+([a-zA-Z_]\\w*)\\s+(?:is\\s+)?(?:less than|<)\\s+(\\d+|[a-zA-Z_]\\w*)', desc_lower)
+            if condition_match:
+                var_name = condition_match.group(1)
+                limit = condition_match.group(2)
+                code_parts = []
+                # Add variable initialization if not present
+                if not any(var_name in a for a in assignments):
+                    code_parts.append(f"{var_name} = 0")
+                code_parts.extend(assignments)
+                code_parts.append(f"while {var_name} < {limit}:")
+                code_parts.append(f"    print({var_name})")
+                code_parts.append(f"    {var_name} += 1")
+                logger.info(f"Added while loop for {var_name} < {limit}")
+                return '\\n'.join(code_parts)
+
+        # Pattern: For loop with step (e.g., "print numbers from 0 to 10 step 2")
+        if ('step' in desc_lower or 'increment' in desc_lower) and not has_loop:
+            step_match = re.search(r'step\\s+(\\d+)', desc_lower)
+            if step_match:
+                step = step_match.group(1)
+                start_expr, end_expr = self._extract_range(description, assignments)
+                if end_expr:
+                    code_parts = []
+                    code_parts.extend(assignments)
+                    code_parts.append(f'for i in range({start_expr or 0}, {end_expr} + 1, {step}):')
+                    code_parts.append('    print(i)')
+                    logger.info(f"Added for loop with step {step}")
+                    return '\\n'.join(code_parts)
+
+        # Pattern: Countdown/reverse loop (e.g., "print numbers from 10 to 1" or "countdown")
+        if ('countdown' in desc_lower or 'reverse' in desc_lower or 'descending' in desc_lower) and not has_loop:
+            start_expr, end_expr = self._extract_range(description, assignments)
+            # Swap start and end for countdown
+            if start_expr and end_expr:
+                code_parts = []
+                code_parts.extend(assignments)
+                code_parts.append(f'for i in range({end_expr}, {start_expr} - 1, -1):')
+                code_parts.append('    print(i)')
+                logger.info(f"Added countdown loop from {end_expr} to {start_expr}")
+                return '\\n'.join(code_parts)
+
+        # ========== INPUT/OUTPUT PATTERNS ==========
+
+        # Pattern: Get user input (e.g., "take input from user", "read a number")
+        if ('input' in desc_lower or 'read' in desc_lower or 'take' in desc_lower) and ('user' in desc_lower or 'number' in desc_lower or 'name' in desc_lower):
+            if 'number' in desc_lower or 'integer' in desc_lower:
+                var_name = 'num'
+                code_parts = [f"{var_name} = int(input('Enter a number: '))"]
+                code_parts.append(f"print({var_name})")
+                logger.info("Added integer input pattern")
+                return '\\n'.join(code_parts)
+            elif 'name' in desc_lower or 'string' in desc_lower or 'text' in desc_lower:
+                var_name = 'name' if 'name' in desc_lower else 'text'
+                code_parts = [f"{var_name} = input('Enter {var_name}: ')"]
+                code_parts.append(f"print({var_name})")
+                logger.info("Added string input pattern")
+                return '\\n'.join(code_parts)
+
+        # Pattern: Multiple inputs (e.g., "take two numbers as input")
+        if ('two' in desc_lower or 'three' in desc_lower) and ('input' in desc_lower or 'read' in desc_lower):
+            count = 2 if 'two' in desc_lower else 3
+            code_parts = []
+            for i in range(1, count + 1):
+                code_parts.append(f"num{i} = int(input('Enter number {i}: '))")
+            if 'add' in desc_lower or 'sum' in desc_lower:
+                sum_expr = ' + '.join([f'num{i}' for i in range(1, count + 1)])
+                code_parts.append(f"result = {sum_expr}")
+                code_parts.append("print(result)")
+            else:
+                for i in range(1, count + 1):
+                    code_parts.append(f"print(num{i})")
+            logger.info(f"Added {count} inputs pattern")
+            return '\\n'.join(code_parts)
+
+        # ========== STRING MANIPULATION PATTERNS ==========
+
+        # Pattern: Reverse a string
+        if 'reverse' in desc_lower and 'string' in desc_lower:
+            code_parts = []
+            code_parts.append("text = input('Enter a string: ')")
+            code_parts.append("reversed_text = text[::-1]")
+            code_parts.append("print(reversed_text)")
+            logger.info("Added string reverse pattern")
+            return '\\n'.join(code_parts)
+
+        # Pattern: Convert to uppercase/lowercase
+        if ('uppercase' in desc_lower or 'upper' in desc_lower or 'capital' in desc_lower) and 'string' in desc_lower:
+            code_parts = []
+            code_parts.append("text = input('Enter a string: ')")
+            code_parts.append("upper_text = text.upper()")
+            code_parts.append("print(upper_text)")
+            logger.info("Added uppercase conversion pattern")
+            return '\\n'.join(code_parts)
+        
+        if ('lowercase' in desc_lower or 'lower' in desc_lower or 'small' in desc_lower) and 'string' in desc_lower:
+            code_parts = []
+            code_parts.append("text = input('Enter a string: ')")
+            code_parts.append("lower_text = text.lower()")
+            code_parts.append("print(lower_text)")
+            logger.info("Added lowercase conversion pattern")
+            return '\\n'.join(code_parts)
+
+        # Pattern: String concatenation
+        if ('concatenate' in desc_lower or 'join' in desc_lower or 'combine' in desc_lower) and 'string' in desc_lower:
+            code_parts = []
+            code_parts.append("str1 = input('Enter first string: ')")
+            code_parts.append("str2 = input('Enter second string: ')")
+            code_parts.append("result = str1 + str2")
+            code_parts.append("print(result)")
+            logger.info("Added string concatenation pattern")
+            return '\\n'.join(code_parts)
+
+        # Pattern: String length
+        if ('length' in desc_lower or 'size' in desc_lower or 'count' in desc_lower) and 'string' in desc_lower:
+            code_parts = []
+            code_parts.append("text = input('Enter a string: ')")
+            code_parts.append("length = len(text)")
+            code_parts.append("print(length)")
+            logger.info("Added string length pattern")
+            return '\\n'.join(code_parts)
+
+        # ========== LIST/ARRAY PATTERNS ==========
+
+        # Pattern: Create a list
+        if ('create' in desc_lower or 'make' in desc_lower or 'initialize' in desc_lower) and ('list' in desc_lower or 'array' in desc_lower):
+            code_parts = []
+            # Check for specific values
+            values_match = re.search(r'(?:with|of|containing)\\s+([\\d,\\s]+)', description)
+            if values_match:
+                values = values_match.group(1).strip()
+                code_parts.append(f"my_list = [{values}]")
+            else:
+                code_parts.append("my_list = [1, 2, 3, 4, 5]  # Example list")
+            code_parts.append("print(my_list)")
+            logger.info("Added list creation pattern")
+            return '\\n'.join(code_parts)
+
+        # Pattern: Append to list
+        if ('append' in desc_lower or 'add' in desc_lower) and ('list' in desc_lower or 'array' in desc_lower):
+            code_parts = []
+            code_parts.append("my_list = [1, 2, 3]")
+            code_parts.append("my_list.append(4)")
+            code_parts.append("print(my_list)")
+            logger.info("Added list append pattern")
+            return '\\n'.join(code_parts)
+
+        # Pattern: Sum of list elements
+        if 'sum' in desc_lower and ('list' in desc_lower or 'array' in desc_lower or 'elements' in desc_lower):
+            code_parts = []
+            code_parts.append("my_list = [1, 2, 3, 4, 5]")
+            code_parts.append("total = sum(my_list)")
+            code_parts.append("print(total)")
+            logger.info("Added list sum pattern")
+            return '\\n'.join(code_parts)
+
+        # Pattern: Find maximum/minimum in list
+        if ('maximum' in desc_lower or 'max' in desc_lower or 'largest' in desc_lower) and ('list' in desc_lower or 'array' in desc_lower):
+            code_parts = []
+            code_parts.append("my_list = [1, 2, 3, 4, 5]")
+            code_parts.append("maximum = max(my_list)")
+            code_parts.append("print(maximum)")
+            logger.info("Added list maximum pattern")
+            return '\\n'.join(code_parts)
+        
+        if ('minimum' in desc_lower or 'min' in desc_lower or 'smallest' in desc_lower) and ('list' in desc_lower or 'array' in desc_lower):
+            code_parts = []
+            code_parts.append("my_list = [1, 2, 3, 4, 5]")
+            code_parts.append("minimum = min(my_list)")
+            code_parts.append("print(minimum)")
+            logger.info("Added list minimum pattern")
+            return '\\n'.join(code_parts)
+
+        # Pattern: Sort a list
+        if 'sort' in desc_lower and ('list' in desc_lower or 'array' in desc_lower):
+            code_parts = []
+            code_parts.append("my_list = [5, 2, 8, 1, 9]")
+            if 'descending' in desc_lower or 'reverse' in desc_lower:
+                code_parts.append("my_list.sort(reverse=True)")
+            else:
+                code_parts.append("my_list.sort()")
+            code_parts.append("print(my_list)")
+            logger.info("Added list sort pattern")
+            return '\\n'.join(code_parts)
+
+        # Pattern: Iterate through list
+        if ('iterate' in desc_lower or 'loop' in desc_lower or 'traverse' in desc_lower) and ('list' in desc_lower or 'array' in desc_lower):
+            code_parts = []
+            code_parts.append("my_list = [1, 2, 3, 4, 5]")
+            code_parts.append("for item in my_list:")
+            code_parts.append("    print(item)")
+            logger.info("Added list iteration pattern")
+            return '\\n'.join(code_parts)
 
         return generated_code
 

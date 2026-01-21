@@ -38,11 +38,13 @@ The application follows a multi-stage pipeline:
 - **Virtual Keyboard**: For Kannada text input
 
 ### AI/ML
-- **NLP Model**: CodeT5 fine-tuned on custom dataset and deployed to Hugging Face
-- **Dataset**: Custom programming concepts in natural language mapped to Python code
+- **NLP Model**: CodeT5 with HuggingFace Inference API fallback
+- **Smart Heuristics**: 35+ pattern-matching rules for common programming constructs
+- **Hybrid Approach**: Combines AI generation with deterministic logic for reliability
 
 ## 📋 Features
 
+### Core Capabilities
 - ✅ Multi-modal input (Speech & Keyboard)
 - ✅ Kannada language support for algorithm description
 - ✅ Real-time translation and code generation
@@ -50,6 +52,42 @@ The application follows a multi-stage pipeline:
 - ✅ Error messages in Kannada for better understanding
 - ✅ Programming tutorials and quizzes
 - ✅ Educational content display
+
+### Code Generation Patterns (35+ Supported)
+
+**Loop Variations:**
+- For loops with custom ranges
+- While loops with conditions
+- For loops with step/increment
+- Countdown/descending loops
+- Even/odd number filtering
+
+**Input/Output Operations:**
+- Single number input
+- String/text input
+- Multiple inputs (2-3 numbers)
+- Input with arithmetic operations
+
+**String Manipulation:**
+- String reversal
+- Uppercase/lowercase conversion
+- String concatenation
+- Length calculation
+
+**List/Array Operations:**
+- List creation
+- Element insertion (append)
+- Sum of elements
+- Finding max/min values
+- Sorting (ascending/descending)
+- List iteration
+
+**Arithmetic & Logic:**
+- Basic operations (add, subtract, multiply, divide)
+- Conditional statements (if-then)
+- Variable assignments
+- Print statements
+- Function definitions
 
 ## 🚀 Getting Started
 
