@@ -1,0 +1,39 @@
+services:
+  # Backend Service (Django)
+  - type: web
+    name: codenudi-backend
+    env: python
+    buildCommand: cd backend && bash build.sh
+    startCommand: cd backend && daphne core.asgi:application --port $PORT --bind 0.0.0.0
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: HF_TOKEN
+        sync: false # User must provide this in Render dashboard
+      - key: HF_REPO_ID
+        value: Salesforce/codet5-base
+      - key: MONGO_URI
+        sync: false # User must provide their MongoDB Atlas URL
+      - key: DATABASE_URL
+        fromDatabase:
+          name: codenudi-db
+          property: connectionString
+
+  # Frontend Service (React/Vite)
+  - type: web
+    name: codenudi-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    publishDir: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromStack:
+          service: codenudi-backend
+          property: url
+        suffix: /api/
+
+databases:
+  - name: codenudi-db
+    plan: free # Use free tier for Postgres

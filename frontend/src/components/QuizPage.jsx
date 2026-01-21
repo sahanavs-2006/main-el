@@ -42,11 +42,12 @@ const QuizPage = ({ onBack }) => {
     try {
       setLoading(true);
       setError(null);
-      let url = 'http://localhost:8000/api/public/quiz-questions/';
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      let url = `${API_URL}/public/quiz-questions/`;
 
       if (category !== 'all') {
         // Fetch questions by category and limit to 5
-        url = `http://localhost:8000/api/public/quiz-questions/by_category/?category=${category}`;
+        url = `${API_URL}/public/quiz-questions/by_category/?category=${category}`;
       }
 
       console.log('Fetching from:', url);
