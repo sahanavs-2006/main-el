@@ -86,6 +86,7 @@ function App() {
             onNavigateToNotes={() => setPage('notes')}
             onNavigateToAbout={() => setPage('about')}
             algorithmData={algorithmData}
+            user={user}
           />
         ) : page === 'about' ? (
           <AboutPage />
