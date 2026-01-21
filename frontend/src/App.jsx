@@ -9,6 +9,7 @@ import QuizPage from './components/QuizPage';
 import StudyMaterials from './components/StudyMaterials';
 import LoginPage from './components/LoginPage';
 import AboutPage from './components/AboutPage';
+import Leaderboard from './components/Leaderboard';
 import Footer from './components/Footer';
 
 function App() {
@@ -89,7 +90,12 @@ function App() {
         ) : page === 'about' ? (
           <AboutPage />
         ) : page === 'quiz' ? (
-          <QuizPage onBack={() => setPage('dashboard')} />
+          <QuizPage
+            onBack={() => setPage('dashboard')}
+            onNavigateToLeaderboard={() => setPage('leaderboard')}
+          />
+        ) : page === 'leaderboard' ? (
+          <Leaderboard onBack={() => setPage('quiz')} />
         ) : page === 'materials' ? (
           <StudyMaterials onBack={() => setPage('dashboard')} />
         ) : page === 'notes' ? (

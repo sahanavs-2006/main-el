@@ -10,7 +10,7 @@ import {
   Clock
 } from 'lucide-react';
 
-const QuizPage = ({ onBack }) => {
+const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);

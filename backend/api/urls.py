@@ -8,6 +8,7 @@ from .views_auth import (
     HealthCheckView, send_otp_view, verify_otp_register, PublicQuizQuestionViewSet
 )
 from .views_files import FileStorageViewSet, PublicFilesViewSet
+from .views_leaderboard import leaderboard_view, user_rank_view
 
 router = DefaultRouter()
 router.register(r'code-tasks', CodeTaskViewSet, basename='code-task')
@@ -30,6 +31,10 @@ urlpatterns = [
     
     # Analytics
     path('analytics/', LearningAnalyticsView.as_view(), name='analytics'),
+    
+    # Leaderboard
+    path('leaderboard/', leaderboard_view, name='leaderboard'),
+    path('leaderboard/my-rank/', user_rank_view, name='user-rank'),
     
     # Health
     path('health/', HealthCheckView.as_view(), name='health'),
