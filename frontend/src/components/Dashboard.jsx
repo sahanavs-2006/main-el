@@ -144,40 +144,6 @@ const Dashboard = ({ onNavigateToConverter, onNavigateToQuiz, onNavigateToMateri
                     <p className="text-slate-600 dark:text-slate-300 text-lg md:text-xl font-medium">Empowering the next generation in Kannada</p>
                 </div>
 
-                {/* Welcome & Rank Banner */}
-                <div className="mb-12 bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-900 dark:to-slate-950 rounded-3xl p-8 shadow-2xl border border-slate-700 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-
-                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div>
-                            <h1 className="font-kannada text-3xl md:text-4xl font-bold text-white mb-2">
-                                ನಮಸ್ಕಾರ, {user ? user.username : 'Friend'}! 👋
-                            </h1>
-                            <p className="text-slate-400 text-lg">
-                                Welcome back to your coding journey
-                            </p>
-                        </div>
-
-                        {myRank && (
-                            <div className="flex items-center gap-6 bg-slate-800/50 rounded-2xl p-4 border border-slate-700 backdrop-blur-sm">
-                                <div className="text-center px-4 border-r border-slate-700">
-                                    <p className="text-slate-400 text-sm mb-1">ನಿಮ್ಮ ಸ್ಥಾನ (Rank)</p>
-                                    <div className="text-3xl font-bold text-yellow-400 flex items-center justify-center gap-2">
-                                        <Trophy className="w-6 h-6" />
-                                        #{myRank.rank}
-                                    </div>
-                                </div>
-                                <div className="text-center px-4">
-                                    <p className="text-slate-400 text-sm mb-1">ಒಟ್ಟು ಅಂಕಗಳು (Points)</p>
-                                    <div className="text-3xl font-bold text-teal-400 flex items-center justify-center gap-2">
-                                        <Star className="w-6 h-6" />
-                                        {myRank.totalScore}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
 
                 {/* Algorithm Display Section (Only shows if there is data) */}
                 {(algorithmData.kannada || algorithmData.english) && (
