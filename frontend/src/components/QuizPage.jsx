@@ -377,11 +377,11 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
 
       <div className="max-w-4xl mx-auto px-4 mt-8 pb-32">
         {/* Question Card (Image 1) */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-[3rem] p-12 shadow-2xl shadow-slate-200/50 dark:shadow-none mb-10 transition-all">
-          <h2 className="text-slate-900 dark:text-white text-3xl md:text-4xl font-extrabold font-kannada mb-6 leading-tight">
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200/50 dark:shadow-none mb-8 transition-all">
+          <h2 className="text-slate-900 dark:text-white text-2xl md:text-3xl font-extrabold font-kannada mb-4 leading-tight">
             {currentQuestion.question_kannada}
           </h2>
-          <p className="text-slate-400 dark:text-slate-500 font-medium text-lg italic border-l-4 border-slate-100 dark:border-slate-800 pl-6">
+          <p className="text-slate-400 dark:text-slate-500 font-medium text-base italic border-l-4 border-slate-100 dark:border-slate-800 pl-4">
             {currentQuestion.question_english || "What is the correct syntax for this operation?"}
           </p>
         </div>
@@ -415,14 +415,14 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
                 key={option.id}
                 onClick={() => handleSelectAnswer(option.id)}
                 disabled={hasAnswered}
-                className={`w-full group flex items-center justify-between p-6 rounded-[2rem] border-2 transition-all duration-300 shadow-sm hover:shadow-xl ${borderClass} ${bgClass} active:scale-[0.98]`}
+                className={`w-full group flex items-center justify-between p-4 rounded-[1.5rem] border-2 transition-all duration-300 shadow-sm hover:shadow-xl ${borderClass} ${bgClass} active:scale-[0.98]`}
               >
-                <div className="flex items-center gap-8">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-extrabold text-xl shadow-inner transition-colors ${isSelected ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 scale-105' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-inner transition-colors ${isSelected ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 scale-105' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                     }`}>
                     {letter}
                   </div>
-                  <span className="text-slate-800 dark:text-slate-200 text-xl font-bold font-kannada text-left">{option.option_text_kannada}</span>
+                  <span className="text-slate-800 dark:text-slate-200 text-lg font-bold font-kannada text-left">{option.option_text_kannada}</span>
                 </div>
                 {statusIcon}
               </button>
@@ -436,10 +436,10 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
             <div className="max-w-4xl mx-auto flex justify-end">
               <button
                 onClick={handleNext}
-                className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-12 py-5 rounded-[2rem] font-black text-xl flex items-center gap-3 hover:scale-105 transition-all shadow-xl active:scale-95 group"
+                className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3 rounded-[1.5rem] font-bold text-lg flex items-center gap-2 hover:scale-105 transition-all shadow-xl active:scale-95 group"
               >
                 {currentIndex === questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
-                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
