@@ -53,7 +53,7 @@ function App() {
     setPage('execution');
   };
 
-  const contentPadding = (page === 'home' || page === 'login') ? '' : 'pt-28'; // offset for fixed navbar
+  const contentPadding = (page === 'home' || page === 'login' || page === 'dashboard') ? '' : 'pt-28'; // offset for fixed navbar
 
   if (page === 'login') {
     return (
