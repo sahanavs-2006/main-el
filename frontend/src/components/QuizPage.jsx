@@ -230,7 +230,9 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
           <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-2xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-white/5 mb-8">
             <div className="flex justify-around items-center mb-12">
               <div className="flex flex-col items-center">
-                <span className="text-4xl font-extrabold text-slate-900 dark:text-white mb-1">5</span>
+                <span className="text-4xl font-extrabold text-slate-900 dark:text-white mb-1">
+                  {loading ? '-' : questions.length}
+                </span>
                 <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Questions</span>
               </div>
               <div className="h-14 w-px bg-slate-100 dark:bg-white/10" />
@@ -360,13 +362,15 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
       {/* Quiz Progress Header (Image 1) */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6 px-1">
-          <span className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs">Question {currentIndex + 1} of 5</span>
+          <span className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-xs">
+            Question {currentIndex + 1} of {questions.length}
+          </span>
           <span className="text-slate-500 dark:text-slate-400 font-extrabold font-mono">Score: {score}</span>
         </div>
         <div className="w-full h-3 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
           <div
             className="h-full bg-gradient-to-r from-teal-400 to-cyan-500 transition-all duration-700 ease-out"
-            style={{ width: `${((currentIndex + 1) / 5) * 100}%` }}
+            style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
           />
         </div>
       </div>
