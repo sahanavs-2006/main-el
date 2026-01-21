@@ -314,7 +314,7 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
                 <Sparkles
                   key={star}
                   className={`w-10 h-10 transition-all ${star <= score
-                    ? 'text-orange-400 fill-orange-400 scale-110'
+                    ? 'text-yellow-400 fill-yellow-400 scale-110'
                     : 'text-slate-200 dark:text-slate-800'}`}
                 />
               ))}
@@ -324,13 +324,13 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
           <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={handleRetry}
-              className="flex-1 border-2 border-orange-500 text-orange-600 font-bold py-5 rounded-3xl flex items-center justify-center gap-2 hover:bg-orange-50 transition-all active:scale-95"
+              className="flex-1 border-2 border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300 font-bold py-5 rounded-3xl flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95"
             >
               <RotateCcw className="w-5 h-5" /> Try Again
             </button>
             <button
               onClick={() => { setSelectedTopic(null); setQuizState('topics'); }}
-              className="flex-1 bg-gradient-to-r from-orange-500 to-emerald-600 text-white font-bold py-5 rounded-3xl shadow-xl shadow-orange-500/20 hover:shadow-2xl transition-all active:scale-95"
+              className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold py-5 rounded-3xl shadow-xl shadow-teal-500/20 hover:shadow-2xl transition-all active:scale-95"
             >
               Learn More
             </button>
@@ -345,7 +345,7 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-32 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400 font-bold">Loading questions...</p>
         </div>
       </div>
@@ -365,7 +365,7 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
         </div>
         <div className="w-full h-3 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
           <div
-            className="h-full bg-gradient-to-r from-orange-500 to-emerald-500 transition-all duration-700 ease-out"
+            className="h-full bg-gradient-to-r from-teal-400 to-cyan-500 transition-all duration-700 ease-out"
             style={{ width: `${((currentIndex + 1) / 5) * 100}%` }}
           />
         </div>
