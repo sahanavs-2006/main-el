@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+
+# Environments
+venv/
+.env/
+*.venv/
+
+# Credentials / secrets
+.env
+.env.*
+credentials/
+*.json
+
+# Django
+/db.sqlite3
+backend/db.sqlite3
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Node / frontend
+node_modules/
+dist/
+build/
+
+# Large model files - exclude from git
+codet5_python_generator/
+codet5_final/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Ignore large CodeT5 model files
+codet5_final/
+
