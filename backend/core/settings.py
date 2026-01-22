@@ -105,7 +105,14 @@ CORS_ALLOWED_ORIGINS = [
 
 env_origins = os.getenv('CORS_ALLOWED_ORIGINS')
 if env_origins:
-    CORS_ALLOWED_ORIGINS.extend(env_origins.split(','))
+    for origin in env_origins.split(','):
+        cleaned_origin = origin.strip()
+        if not cleaned_origin:
+            continue
+        # Auto-fix missing schema (common deployment error)
+        if not cleaned_origin.startswith('http://') and not cleaned_origin.startswith('https://'):
+            cleaned_origin = f'https://{cleaned_origin}'
+        CORS_ALLOWED_ORIGINS.append(cleaned_origin)
 
 CORS_ALLOW_CREDENTIALS = True
 
