@@ -24,6 +24,7 @@ ALLOWED_HOSTS = [
 # Application definition
 INSTALLED_APPS = [
     'daphne',  # Must be first for WebSocket support
+    'django.contrib.staticfiles',  # Required for collecting static files
     'django.contrib.contenttypes',
     'django.contrib.auth',
     'rest_framework',
