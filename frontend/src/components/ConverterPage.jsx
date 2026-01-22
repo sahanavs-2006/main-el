@@ -184,7 +184,7 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="mb-6 flex items-center justify-center relative">
           <h1 className="font-kannada text-2xl md:text-3xl font-bold text-slate-900 dark:text-white drop-shadow-sm text-center">
-            ಕನ್ನಡ ಅಲ್ಗಾರಿದಮ್: ಬರೆಯಿರಿ ಅಥವಾ ಮಾತನಾಡಿ
+            ಕನ್ನಡ ಅಲ್ಗಾರಿದಮ್: ಬರೆಯಿರಿ
           </h1>
         </div>
 
@@ -353,7 +353,6 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
 
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-xl transition-colors duration-300">
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">🧮</span>
                 <h3 className="font-kannada text-lg font-bold text-slate-900 dark:text-white">
                   ಅಲ್ಗಾರಿದಮ್ (Algorithm)
                 </h3>
