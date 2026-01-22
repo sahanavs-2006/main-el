@@ -7,6 +7,7 @@ from .views_auth import (
     LearningAnalyticsView, RecommendationViewSet, LearningSessionViewSet,
     HealthCheckView, send_otp_view, verify_otp_register, PublicQuizQuestionViewSet
 )
+from .views_seed import seed_quiz_view
 from .views_files import FileStorageViewSet, PublicFilesViewSet
 from .views_leaderboard import leaderboard_view, user_rank_view
 
@@ -38,6 +39,7 @@ urlpatterns = [
     
     # Health
     path('health/', HealthCheckView.as_view(), name='health'),
+    path('seed-quiz/', seed_quiz_view, name='seed-quiz'),
     
     # Original endpoints (keep for backward compatibility)
     path('translate/kannada/', views.translate_kannada, name='translate_kannada'),
