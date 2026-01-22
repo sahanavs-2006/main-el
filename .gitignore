@@ -15,7 +15,9 @@ venv/
 .env
 .env.*
 credentials/
-*.json
+# *.json  <-- Removed this because it ignores package.json!
+secrets.json
+service-account.json
 
 # Django
 /db.sqlite3
