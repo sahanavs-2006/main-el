@@ -385,7 +385,6 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
 
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-xl transition-colors duration-300">
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">💻</span>
                 <h3 className="font-kannada text-lg font-bold text-slate-900 dark:text-white">
                   ಉತ್ಪತ್ತಿಯಾದ ಕೋಡ್ (Generated Code)
                 </h3>
