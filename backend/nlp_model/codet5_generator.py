@@ -20,13 +20,21 @@ class CodeT5Generator:
         self.hf_repo_id = hf_repo_id or os.getenv('HF_REPO_ID', 'Salesforce/codet5-base')
         self.api_url = f"https://api-inference.huggingface.co/models/{self.hf_repo_id}"
         
+        # Check if we should skip local loading (e.g. on Render) to save memory
+        # Render sets the RENDER environment variable to true
+        skip_local = os.getenv('RENDER') or os.getenv('SKIP_LOCAL_MODEL', 'false').lower() == 'true'
+        
         try:
-            from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
-            logger.info(f"Loading model and tokenizer from {self.hf_repo_id} ...")
-            self.tokenizer = AutoTokenizer.from_pretrained(self.hf_repo_id)
-            self.model = AutoModelForSeq2SeqLM.from_pretrained(self.hf_repo_id)
-            self.pipeline = pipeline("text2text-generation", model=self.model, tokenizer=self.tokenizer)
-            logger.info(f"✓ CodeT5 generator loaded locally: {self.hf_repo_id}")
+            if skip_local:
+                logger.info("Skipping local model loading on Render/Cloud environment to save memory.")
+                self.pipeline = None
+            else:
+                from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
+                logger.info(f"Loading model and tokenizer from {self.hf_repo_id} ...")
+                self.tokenizer = AutoTokenizer.from_pretrained(self.hf_repo_id)
+                self.model = AutoModelForSeq2SeqLM.from_pretrained(self.hf_repo_id)
+                self.pipeline = pipeline("text2text-generation", model=self.model, tokenizer=self.tokenizer)
+                logger.info(f"✓ CodeT5 generator loaded locally: {self.hf_repo_id}")
         except Exception as e:
             logger.warning(f"Local model loading failed (might be environment constraints): {e}")
             logger.info("Will attempt to use HuggingFace Inference API if HF_TOKEN is provided.")

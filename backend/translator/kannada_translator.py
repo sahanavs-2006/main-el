@@ -10,45 +10,54 @@ class KannadaTranslator:
         """Initialize the translator."""
         self.kannada_to_english = GoogleTranslator(source='kn', target='en')
         self.english_to_kannada = GoogleTranslator(source='en', target='kn')
+        self.force_googletrans = False
+        
+        try:
+            from googletrans import Translator as GTranslator
+            self.g_translator = GTranslator()
+        except ImportError:
+            self.g_translator = None
     
     def translate_kannada_to_english(self, text):
         """
         Translate Kannada text to English.
-        
-        Args:
-            text (str): Kannada text to translate
-            
-        Returns:
-            str: Translated English text, or original text if translation fails
         """
         if not text or not text.strip():
             return ""
         
+        # Method 1: deep-translator (standard)
         try:
-            if '\n' in text:
-                logger.info("Multi-line text detected, translating line by line")
-                lines = text.split('\n')
-                translated_lines = []
-                for line in lines:
-                    if line.strip():
-                        try:
-                            # Translate each line individually to preserve structure
+            if not self.force_googletrans:
+                if '\n' in text:
+                    logger.info("Multi-line text detected, translating line by line")
+                    lines = text.split('\n')
+                    translated_lines = []
+                    for line in lines:
+                        if line.strip():
                             trans = self.kannada_to_english.translate(line)
                             translated_lines.append(trans if trans else line)
-                        except Exception as line_err:
-                            logger.error(f"Error translating line '{line[:20]}': {line_err}")
-                            translated_lines.append(line)
-                    else:
-                        translated_lines.append('')
-                result = '\n'.join(translated_lines)
-            else:
-                result = self.kannada_to_english.translate(text)
-            
-            logger.info(f"Translated: {text[:50]} -> {result[:50]}")
-            return result
+                        else:
+                            translated_lines.append('')
+                    result = '\n'.join(translated_lines)
+                else:
+                    result = self.kannada_to_english.translate(text)
+                
+                logger.info(f"Translated (deep_translator): {text[:50]} -> {result[:50]}")
+                return result
         except Exception as e:
-            logger.error(f"Translation error (Kannada->English): {str(e)}")
-            return text  # Return original if translation fails
+            logger.warning(f"deep-translator failed: {e}. Trying fallback.")
+            
+        # Method 2: googletrans (fallback)
+        if self.g_translator:
+            try:
+                # googletrans handles newlines better usually
+                result = self.g_translator.translate(text, src='kn', dest='en').text
+                logger.info(f"Translated (googletrans): {text[:50]} -> {result[:50]}")
+                return result
+            except Exception as e:
+                logger.error(f"googletrans fallback failed: {e}")
+        
+        return text  # Return original if all fail
     
     def translate_english_to_kannada(self, text):
         """
