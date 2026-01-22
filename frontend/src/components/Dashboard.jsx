@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Users, Lightbulb, Trophy, ArrowRight, Sparkles, Code2, BookOpen, Star } from 'lucide-react';
 
-const Dashboard = ({ onNavigateToConverter, onNavigateToQuiz, onNavigateToMaterials, onNavigateToNotes, onNavigateToAbout, algorithmData, user }) => {
+const Dashboard = ({ onNavigateToConverter, onNavigateToQuiz, onNavigateToTutorials, onNavigateToMaterials, onNavigateToNotes, onNavigateToAbout, algorithmData, user }) => {
     const [myRank, setMyRank] = useState(null);
 
     useEffect(() => {
@@ -27,24 +27,24 @@ const Dashboard = ({ onNavigateToConverter, onNavigateToQuiz, onNavigateToMateri
     const features = [
         {
             title: 'ಕನ್ನಡ ಟ್ಯೂಟೋರಿಯಲ್ಸ್',
-            subtitle: 'Study Materials',
-            description: 'Download comprehensive study guides and PDFs',
-            icon: '📚',
-            iconGradient: 'from-teal-400 via-teal-500 to-teal-600',
-            bgColor: 'from-teal-500/10 to-teal-600/10 dark:from-teal-500/20 dark:to-teal-600/20',
-            borderColor: 'border-teal-200 dark:border-teal-400/30',
-            glowColor: 'shadow-teal-500/10 dark:shadow-teal-500/20',
-            onClick: onNavigateToMaterials
+            subtitle: 'Interactive Tutorials',
+            description: 'Learn Python concepts step-by-step in Kannada',
+            icon: '📖',
+            iconGradient: 'from-teal-400 to-teal-600',
+            bgColor: 'bg-white dark:bg-slate-900',
+            borderColor: 'border-slate-900 dark:border-white',
+            glowColor: 'shadow-slate-200/50 dark:shadow-none',
+            onClick: onNavigateToTutorials
         },
         {
             title: 'ಕೋಡಿಂಗ್ ಅಭ್ಯಾಸ',
             subtitle: 'Practice Coding',
             description: 'Write Kannada logic, run Python code instantly',
             icon: '💻',
-            iconGradient: 'from-cyan-400 via-teal-500 to-teal-600',
-            bgColor: 'from-slate-700/80 to-slate-900/80',
-            borderColor: 'border-cyan-400/50',
-            glowColor: 'shadow-cyan-400/40',
+            iconGradient: 'from-emerald-400 to-teal-500',
+            bgColor: 'bg-white dark:bg-slate-900',
+            borderColor: 'border-slate-900 dark:border-white',
+            glowColor: 'shadow-teal-500/10 dark:shadow-none',
             onClick: onNavigateToConverter,
             isPrimary: true
         },
@@ -53,10 +53,10 @@ const Dashboard = ({ onNavigateToConverter, onNavigateToQuiz, onNavigateToMateri
             subtitle: 'Quizzes',
             description: 'Test your knowledge with interactive quizzes',
             icon: '✏️',
-            iconGradient: 'from-emerald-400 via-emerald-500 to-emerald-600',
-            bgColor: 'from-emerald-500/10 to-emerald-600/10 dark:from-emerald-500/20 dark:to-emerald-600/20',
-            borderColor: 'border-emerald-200 dark:border-emerald-400/30',
-            glowColor: 'shadow-emerald-500/10 dark:shadow-emerald-500/20',
+            iconGradient: 'from-amber-400 to-orange-500',
+            bgColor: 'bg-white dark:bg-slate-900',
+            borderColor: 'border-slate-900 dark:border-white',
+            glowColor: 'shadow-slate-200/50 dark:shadow-none',
             onClick: onNavigateToQuiz
         },
         {
@@ -64,10 +64,10 @@ const Dashboard = ({ onNavigateToConverter, onNavigateToQuiz, onNavigateToMateri
             subtitle: 'About Us',
             description: 'Learn about our mission and team',
             icon: '🎓',
-            iconGradient: 'from-cyan-400 via-cyan-500 to-teal-600',
-            bgColor: 'from-cyan-500/10 to-teal-600/10 dark:from-cyan-500/20 dark:to-teal-600/20',
-            borderColor: 'border-cyan-200 dark:border-cyan-400/30',
-            glowColor: 'shadow-cyan-500/10 dark:shadow-cyan-500/20',
+            iconGradient: 'from-blue-400 to-indigo-600',
+            bgColor: 'bg-white dark:bg-slate-900',
+            borderColor: 'border-slate-900 dark:border-white',
+            glowColor: 'shadow-slate-200/50 dark:shadow-none',
             onClick: onNavigateToAbout
         }
     ];
@@ -121,58 +121,15 @@ const Dashboard = ({ onNavigateToConverter, onNavigateToQuiz, onNavigateToMateri
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 pb-12 px-4 relative overflow-hidden transition-colors duration-300">
-            {/* Animated Background Elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {/* Radial glow behind center */}
-                <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-teal-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="min-h-screen bg-white dark:bg-slate-950 pt-20 pb-12 px-4 transition-colors duration-300">
 
-                {/* Subtle floating particles */}
-                <div className="absolute top-20 left-[10%] w-2 h-2 bg-cyan-400/40 rounded-full animate-float" />
-                <div className="absolute top-40 right-[15%] w-3 h-3 bg-teal-400/30 rounded-full animate-float" style={{ animationDelay: '2s' }} />
-                <div className="absolute bottom-40 left-[20%] w-2 h-2 bg-cyan-400/40 rounded-full animate-float" style={{ animationDelay: '4s' }} />
-                <div className="absolute top-60 right-[30%] w-2 h-2 bg-yellow-400/30 rounded-full animate-float" style={{ animationDelay: '3s' }} />
-            </div>
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                {/* Header with fade-in animation */}
-                <div className="text-center mb-16 animate-fadeIn">
-                    <h1 className="font-kannada text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-3 drop-shadow-2xl dark:bg-gradient-to-r dark:from-white dark:via-cyan-100 dark:to-white dark:bg-clip-text dark:text-transparent">
-                        Code <span className="font-kannada">ನುಡಿ</span> ಡ್ಯಾಶ್‌ಬೋರ್ಡ್
-                    </h1>
-                    <p className="text-slate-600 dark:text-slate-300 text-lg md:text-xl font-medium">Empowering the next generation in Kannada</p>
-                </div>
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
 
-                {/* Algorithm Display Section (Only shows if there is data) */}
-                {(algorithmData.kannada || algorithmData.english) && (
-                    <div className="mb-12 bg-white dark:bg-slate-800/40 backdrop-blur-sm rounded-3xl border border-slate-200 dark:border-slate-600/50 p-8 md:p-12 shadow-2xl animate-slideUp" style={{ animationDelay: '0.6s' }}>
-                        <h2 className="font-kannada text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-8 flex items-center gap-3">
-                            <Sparkles className="w-8 h-8 text-teal-500" />
-                            <span>ಅಲ್ಗಾರಿದಮ್ (Algorithm)</span>
-                        </h2>
 
-                        <div className="space-y-6">
-                            {/* Kannada Algorithm */}
-                            <div className="bg-slate-100 dark:bg-slate-900/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/50">
-                                <h3 className="font-kannada text-lg font-semibold text-teal-600 dark:text-yellow-400 mb-3">ಇನ್‌ಪುಟ್ (Kannada):</h3>
-                                <p className="font-kannada text-slate-800 dark:text-white text-lg leading-relaxed">{algorithmData.kannada}</p>
-                            </div>
-
-                            {/* English Translation */}
-                            {algorithmData?.english && algorithmData.english.trim() && (
-                                <div className="bg-slate-100 dark:bg-slate-900/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/50">
-                                    <h3 className="font-semibold text-teal-600 dark:text-cyan-400 mb-3 text-lg">English Translation:</h3>
-                                    <p className="text-slate-800 dark:text-white text-base leading-relaxed">{algorithmData.english}</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
 
                 {/* Feature Cards Section */}
-                <div className="mb-20">
+                <div className="mb-20 mt-12">
                     <h2 className="font-kannada text-3xl md:text-4xl font-bold text-slate-900 dark:text-white text-center mb-4 drop-shadow-lg animate-fadeIn" style={{ animationDelay: '0.2s' }}>
                         ಪ್ರಾರಂಭಿಸಿ (Get Started)
                     </h2>
@@ -185,12 +142,12 @@ const Dashboard = ({ onNavigateToConverter, onNavigateToQuiz, onNavigateToMateri
                             <button
                                 key={index}
                                 onClick={feature.onClick}
-                                className={`group relative overflow-hidden rounded-3xl backdrop-blur-sm border-2 
-                  ${feature.borderColor} ${feature.glowColor}
+                                className={`group relative overflow-hidden rounded-3xl border-2 
+                  ${feature.borderColor}
                   transition-all duration-500 
-                  hover:scale-[1.03] hover:shadow-2xl hover:-translate-y-2
-                  focus:outline-none focus:ring-4 focus:ring-yellow-400/50
-                  ${feature.isPrimary ? 'sm:col-span-2 lg:col-span-1 ring-2 ring-yellow-400/60 shadow-yellow-400/30' : ''}
+                  hover:shadow-xl hover:-translate-y-1
+                  focus:outline-none 
+                  ${feature.isPrimary ? 'sm:col-span-2 lg:col-span-1 border-teal-500' : 'border-slate-200 dark:border-white'}
                   animate-slideUp`}
                                 style={{
                                     animationDelay: `${index * 0.15}s`,
@@ -205,46 +162,39 @@ const Dashboard = ({ onNavigateToConverter, onNavigateToQuiz, onNavigateToMateri
                                     </div>
                                 )}
 
-                                {/* Card Background with glassmorphism */}
-                                <div className={`relative bg-gradient-to-br ${feature.bgColor} backdrop-blur-xl p-8 md:p-10 ${feature.isPrimary ? 'h-80' : 'h-72'} flex flex-col items-center justify-center text-center`}>
+                                {/* Card Background */}
+                                <div className={`relative ${feature.bgColor} p-6 md:p-8 ${feature.isPrimary ? 'h-72' : 'h-64'} flex flex-col items-center justify-center text-center`}>
 
-                                    {/* Animated glow effect on hover */}
-                                    <div className={`absolute inset-0 bg-gradient-to-br ${feature.iconGradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
 
-                                    {/* Icon container with 3D effect */}
-                                    <div className={`relative mb-6 ${feature.isPrimary ? 'w-32 h-32' : 'w-28 h-28'} rounded-full bg-gradient-to-br ${feature.iconGradient} p-[3px] shadow-2xl group-hover:shadow-3xl transition-all duration-500 animate-float`}
-                                        style={{ animationDelay: `${index * 0.5}s` }}>
-                                        <div className="w-full h-full rounded-full bg-slate-900/90 backdrop-blur-xl flex items-center justify-center group-hover:bg-slate-900/70 transition-colors duration-300">
-                                            <div className={`${feature.isPrimary ? 'text-6xl md:text-7xl' : 'text-5xl md:text-6xl'} transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
+                                    {/* Icon container - Restored and made static */}
+                                    <div className={`relative mb-4 ${feature.isPrimary ? 'w-24 h-24' : 'w-20 h-20'} rounded-full bg-slate-100 dark:bg-slate-800 p-[3px] shadow-lg`}>
+                                        <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center transition-colors duration-300">
+                                            <div className={`${feature.isPrimary ? 'text-5xl md:text-6xl' : 'text-4xl md:text-5xl'}`}>
                                                 {feature.icon}
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Text content */}
-                                    <h2 className={`font-kannada ${feature.isPrimary ? 'text-3xl md:text-4xl text-white' : 'text-2xl md:text-3xl text-slate-900 dark:text-white'} font-bold mb-2 drop-shadow-lg group-hover:text-cyan-600 dark:group-hover:text-yellow-100 transition-colors duration-300`}>
+                                    <h2 className="font-kannada text-xl md:text-2xl lg:text-3xl text-slate-900 dark:text-white font-bold mb-1 transition-colors duration-300">
                                         {feature.title}
                                     </h2>
-                                    <p className={`${feature.isPrimary ? 'text-white/80' : 'text-slate-600 dark:text-white/80'} text-sm md:text-base font-semibold mb-3`}>
+                                    <p className="text-slate-600 dark:text-slate-400 text-sm font-semibold mb-2">
                                         {feature.subtitle}
                                     </p>
-                                    <p className={`${feature.isPrimary ? 'text-slate-300' : 'text-slate-500 dark:text-slate-300'} text-xs md:text-sm ${feature.isPrimary ? 'max-w-md' : 'max-w-xs'} leading-relaxed`}>
+                                    <p className="text-slate-500 dark:text-slate-400 text-xs max-w-xs leading-relaxed">
                                         {feature.description}
                                     </p>
 
                                     {/* Action indicator for primary card */}
                                     {feature.isPrimary && (
-                                        <div className="mt-6 flex items-center gap-2 text-yellow-400 font-semibold text-sm animate-bounce">
+                                        <div className="mt-4 flex items-center gap-2 text-teal-600 dark:text-yellow-400 font-bold text-xs animate-bounce">
                                             <span>Click to begin</span>
                                             <span>→</span>
                                         </div>
                                     )}
                                 </div>
 
-                                {/* Hover shimmer effect */}
-                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                                </div>
                             </button>
                         ))}
                     </div>

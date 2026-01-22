@@ -206,45 +206,80 @@ def full_pipeline(request):
         # Use cleaned text for processing
         kannada_text = cleaned_text
         
+        # --- NEW: Groq API Integration ---
+        from nlp_model.groq_service import groq_service
+        
+        # If Groq is configured, try it first
+        if groq_service.client:
+            logger.info("Using Groq API for pipeline")
+            try:
+                groq_result = groq_service.process_kannada_input(kannada_text)
+                
+                if "error" in groq_result:
+                    raise Exception(groq_result["error"])
+                
+                english_description = groq_result.get("english_description", "")
+                generated_code = groq_result.get("generated_code", "")
+                
+                response_data = {
+                    'kannada_description': kannada_text,
+                    'english_description': english_description,
+                    'generated_code': generated_code,
+                }
+                
+                # Skip legacy steps below since we have what we need
+                # Just define variables to satisfy downstream logic if needed, or return/continue
+                
+            except Exception as e:
+                logger.error(f"Groq pipeline failed: {e}, falling back to legacy models")
+                # Fallback to legacy logic below...
+                english_description = None
+                generated_code = None
+        else:
+            english_description = None
+            generated_code = None
 
-        # --- Step 1: Translate Kannada to English using GoogleTranslator ---
-        try:
-            english_description = translator.translate_kannada_to_english(kannada_text)
-            if not english_description or english_description.strip() == '':
-                raise ValueError("Translation returned empty result")
-        except Exception as e:
-            error_msg = f"Translation error: {str(e)}"
-            error_kannada_info = translator.translate_error_to_kannada(error_msg)
-            return Response({
-                'kannada_description': kannada_text,
-                'original_text': preprocessing_result['original_text'],
-                'error': error_kannada_info.get('error', error_msg),
-                'error_kannada': error_kannada_info.get('error_kannada', 'ಅನುವಾದ ದೋಷ: ಕನ್ನಡದಿಂದ ಇಂಗ್ಲಿಷ್‌ಗೆ ಅನುವಾದಿಸಲು ವಿಫಲವಾಗಿದೆ'),
-                'status': 'error'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Only proceed with legacy if Groq didn't run or failed
+        if not english_description or not generated_code:
 
-        # --- Step 2: Generate code using Hugging Face Model (CodeT5) ---
-        try:
-            generation_result = code_generator.generate_code(english_description)
-            generated_code = generation_result.get('code', '')
-            if not generated_code:
-                raise ValueError(generation_result.get('error', 'Code generation failed'))
-        except Exception as e:
-            error_msg = f"Code generation error: {str(e)}"
-            error_kannada_info = translator.translate_error_to_kannada(error_msg)
-            return Response({
+            # --- Step 1: Translate Kannada to English using GoogleTranslator ---
+            try:
+                english_description = translator.translate_kannada_to_english(kannada_text)
+                if not english_description or english_description.strip() == '':
+                    raise ValueError("Translation returned empty result")
+            except Exception as e:
+                error_msg = f"Translation error: {str(e)}"
+                error_kannada_info = translator.translate_error_to_kannada(error_msg)
+                return Response({
+                    'kannada_description': kannada_text,
+                    'original_text': preprocessing_result['original_text'],
+                    'error': error_kannada_info.get('error', error_msg),
+                    'error_kannada': error_kannada_info.get('error_kannada', 'ಅನುವಾದ ದೋಷ: ಕನ್ನಡದಿಂದ ಇಂಗ್ಲಿಷ್‌ಗೆ ಅನುವಾದಿಸಲು ವಿಫಲವಾಗಿದೆ'),
+                    'status': 'error'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # --- Step 2: Generate code using Hugging Face Model (CodeT5) ---
+            try:
+                generation_result = code_generator.generate_code(english_description)
+                generated_code = generation_result.get('code', '')
+                if not generated_code:
+                    raise ValueError(generation_result.get('error', 'Code generation failed'))
+            except Exception as e:
+                error_msg = f"Code generation error: {str(e)}"
+                error_kannada_info = translator.translate_error_to_kannada(error_msg)
+                return Response({
+                    'kannada_description': kannada_text,
+                    'english_description': english_description,
+                    'error': error_kannada_info.get('error', error_msg),
+                    'error_kannada': error_kannada_info.get('error_kannada', 'ಕೋಡ್ ಉತ್ಪಾದನೆ ದೋಷ'),
+                    'status': 'error'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            response_data = {
                 'kannada_description': kannada_text,
                 'english_description': english_description,
-                'error': error_kannada_info.get('error', error_msg),
-                'error_kannada': error_kannada_info.get('error_kannada', 'ಕೋಡ್ ಉತ್ಪಾದನೆ ದೋಷ'),
-                'status': 'error'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        response_data = {
-            'kannada_description': kannada_text,
-            'english_description': english_description,
-            'generated_code': generated_code,
-        }
+                'generated_code': generated_code,
+            }
         
         # Check if code requires user input
         requires_input = 'input(' in generated_code

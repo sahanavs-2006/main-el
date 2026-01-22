@@ -13,7 +13,7 @@ const Input = ({ icon: Icon, ...props }) => (
         )}
         <input
             {...props}
-            className={`flex h-11 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all ${Icon ? 'pl-9' : ''}`}
+            className={`flex h-11 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all ${Icon ? 'pl-9' : ''}`}
         />
     </div>
 );
@@ -63,52 +63,47 @@ const LoginPage = ({ onLoginSuccess, onBack }) => {
         setError('');
         setLoading(true);
 
+        // Simulate network delay for realistic feel (Demo Mode)
+        await new Promise(resolve => setTimeout(resolve, 800));
+
         try {
-            let response;
-            if (isLogin) {
-                // Login Flow
-                response = await login(formData.username, formData.password);
-            } else {
-                // Register Flow
-                if (formData.password !== formData.confirmPassword) {
-                    throw new Error("Passwords do not match");
-                }
-
-                // Construct payload match UserRegistrationSerializer
-                const payload = {
-                    username: formData.username,
-                    email: formData.email,
-                    password: formData.password,
-                    password_confirm: formData.confirmPassword,
-                    first_name: formData.full_name
-                };
-
-                response = await register(payload);
+            // Validation
+            if (!formData.username || !formData.password) {
+                throw new Error("Please enter username and password");
             }
 
-            // Save session
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('user', JSON.stringify(response.user));
+            if (formData.password.length < 6) {
+                throw new Error("Password must be at least 6 characters");
+            }
+
+            // For signup, require full name (unless it's login)
+            if (!isLogin && !formData.full_name?.trim()) {
+                throw new Error("Please enter your name");
+            }
+
+            // DEMO MODE: Create a mock user session locally
+            // This bypasses backend for the project demo
+            const demoUser = {
+                id: 'demo-' + Date.now(),
+                username: formData.username,
+                email: formData.email || `${formData.username}@example.com`,
+                first_name: formData.full_name || formData.username,
+                token: 'demo-token-' + Date.now() // Mock token
+            };
+
+            // Store user in localStorage
+            localStorage.setItem('token', demoUser.token);
+            localStorage.setItem('user', JSON.stringify(demoUser));
+
+            // Dispatch a custom event (optional, keeping consistent with snippet idea)
+            window.dispatchEvent(new CustomEvent('demo-auth-change', { detail: demoUser }));
 
             // Notify parent
-            onLoginSuccess(response.user);
+            onLoginSuccess(demoUser);
+
         } catch (err) {
             console.error(err);
-            let msg = 'Authentication failed';
-
-            if (err.response?.data) {
-                // Handle Django implementation errors (dict of lists)
-                const data = err.response.data;
-                if (data.error) msg = data.error;
-                else if (data.username) msg = `Username: ${data.username[0]}`;
-                else if (data.email) msg = `Email: ${data.email[0]}`;
-                else if (data.password) msg = `Password: ${data.password[0]}`;
-                else if (typeof data === 'object') msg = Object.values(data).flat().join(', ');
-            } else if (err.message) {
-                msg = err.message;
-            }
-
-            setError(msg);
+            setError(err.message || "Authentication failed");
         } finally {
             setLoading(false);
         }
@@ -143,7 +138,7 @@ const LoginPage = ({ onLoginSuccess, onBack }) => {
                 transition={{ duration: 0.5 }}
                 className="w-full max-w-md relative z-10"
             >
-                <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-8 shadow-2xl relative z-10 transition-colors duration-300">
+                <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-white/25 rounded-3xl p-8 shadow-2xl relative z-10 transition-colors duration-300">
                     {/* Header with Custom Symbol */}
                     <div className="flex flex-col items-center mb-10">
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-600 to-teal-600 flex items-center justify-center shadow-xl mb-4 transform hover:scale-105 transition-transform duration-300">
@@ -162,7 +157,7 @@ const LoginPage = ({ onLoginSuccess, onBack }) => {
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-200 rounded-lg text-sm text-center"
+                            className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-300 rounded-lg text-sm text-center font-medium"
                         >
                             {error}
                         </motion.div>
@@ -170,7 +165,7 @@ const LoginPage = ({ onLoginSuccess, onBack }) => {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {!isLogin && (
-                            <div className="space-y-4">
+                            <div className="space-y-4 mb-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-slate-600 dark:text-slate-300">Full Name</label>
                                     <Input
@@ -179,18 +174,6 @@ const LoginPage = ({ onLoginSuccess, onBack }) => {
                                         name="full_name"
                                         placeholder="Enter your name"
                                         value={formData.full_name}
-                                        onChange={handleChange}
-                                        required={!isLogin}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-slate-600 dark:text-slate-300">Email</label>
-                                    <Input
-                                        icon={Mail}
-                                        type="email"
-                                        name="email"
-                                        placeholder="Enter your email"
-                                        value={formData.email}
                                         onChange={handleChange}
                                         required={!isLogin}
                                     />
@@ -204,8 +187,21 @@ const LoginPage = ({ onLoginSuccess, onBack }) => {
                                 icon={User}
                                 type="text"
                                 name="username"
-                                placeholder="Choose a username"
+                                placeholder="Enter username"
                                 value={formData.username}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-slate-600 dark:text-slate-300">Email</label>
+                            <Input
+                                icon={Mail}
+                                type="email"
+                                name="email"
+                                placeholder="Enter email"
+                                value={formData.email}
                                 onChange={handleChange}
                                 required
                             />
@@ -225,18 +221,8 @@ const LoginPage = ({ onLoginSuccess, onBack }) => {
                         </div>
 
                         {!isLogin && (
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-slate-600 dark:text-slate-300">Confirm Password</label>
-                                <Input
-                                    icon={Lock}
-                                    type="password"
-                                    name="confirmPassword"
-                                    placeholder="Confirm your password"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    required={!isLogin}
-                                />
-                            </div>
+                            /* Confirm Password field removed as per user request */
+                            null
                         )}
 
                         <Button type="submit" disabled={loading} className="w-full mt-6 h-12 text-base">

@@ -160,7 +160,17 @@ class LoginView(generics.GenericAPIView):
                 'error': 'Username and password are required'
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        # Try to authenticate with username
         user = authenticate(username=username, password=password)
+        
+        # If username auth fails, try email auth
+        if user is None and '@' in username:
+            try:
+                real_user = User.objects.get(email=username)
+                user = authenticate(username=real_user.username, password=password)
+            except (User.DoesNotExist, User.MultipleObjectsReturned):
+                user = None
+
         if user is None:
             return Response({
                 'error': 'Invalid credentials'

@@ -86,6 +86,13 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
       ...selectedAnswers,
       [currentIndex]: optionId
     });
+
+    // Update score immediately for real-time feedback
+    const currentQuestion = questions[currentIndex];
+    const selectedOption = currentQuestion.options.find(opt => opt.id === optionId);
+    if (selectedOption && selectedOption.is_correct) {
+      setScore(prev => prev + 1);
+    }
   };
 
   const handleNext = () => {
@@ -180,8 +187,8 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
   // Topics Selection Screen
   if (quizState === 'topics') {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-32 pb-12 transition-colors duration-300">
-        <div className="max-w-6xl mx-auto px-4">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-28 pb-12 transition-colors duration-300">
+        <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 font-kannada">
               ಕ್ವಿಜ್ ವಿಷಯಗಳು
@@ -213,53 +220,54 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
   // Quiz Intro Screen (Image 0)
   if (quizState === 'intro') {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-32 pb-12 transition-colors duration-300">
-        <div className="max-w-2xl mx-auto px-4 text-center">
-          <div className="mb-8 flex justify-center animate-in zoom-in duration-500">
-            <div className="w-24 h-24 rounded-[2rem] bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center shadow-lg border-2 border-white dark:border-white/5">
-              <HelpCircle className="w-12 h-12 text-orange-500" />
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-28 pb-12 transition-colors duration-300">
+
+        <div className="max-w-lg mx-auto px-4 text-center">
+          <div className="mb-6 flex justify-center animate-in zoom-in duration-500">
+            <div className="w-20 h-20 rounded-2xl bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-lg border-2 border-white dark:border-white/5">
+              <HelpCircle className="w-10 h-10 text-cyan-600 dark:text-cyan-400" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-3 font-kannada tracking-wide">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-2 font-kannada tracking-wide">
             {selectedTopic.titleKannada}
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mb-12 font-medium text-lg">
+          <p className="text-slate-500 dark:text-slate-400 mb-8 font-medium text-base">
             Test your Python knowledge in Kannada
           </p>
 
-          <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-2xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-white/5 mb-8">
-            <div className="flex justify-around items-center mb-12">
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-white/5 mb-4 max-w-sm mx-auto">
+            <div className="flex justify-around items-center mb-4">
               <div className="flex flex-col items-center">
-                <span className="text-4xl font-extrabold text-slate-900 dark:text-white mb-1">
+                <span className="text-xl font-extrabold text-slate-900 dark:text-white mb-0.5">
                   {loading ? '-' : questions.length}
                 </span>
-                <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Questions</span>
+                <span className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">Questions</span>
               </div>
-              <div className="h-14 w-px bg-slate-100 dark:bg-white/10" />
+              <div className="h-8 w-px bg-slate-100 dark:bg-white/10" />
               <div className="flex flex-col items-center">
-                <span className="text-4xl font-extrabold text-slate-900 dark:text-white mb-1">5</span>
-                <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Minutes</span>
+                <span className="text-xl font-extrabold text-slate-900 dark:text-white mb-0.5">5</span>
+                <span className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">Minutes</span>
               </div>
-              <div className="h-14 w-px bg-slate-100 dark:bg-white/10" />
+              <div className="h-8 w-px bg-slate-100 dark:bg-white/10" />
               <div className="flex flex-col items-center">
-                <Trophy className="w-9 h-9 text-orange-400 mb-1" />
-                <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Earn Badge</span>
+                <Trophy className="w-5 h-5 text-teal-500 mb-0.5" />
+                <span className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">Earn Badge</span>
               </div>
             </div>
 
             <button
               onClick={startQuiz}
               disabled={loading || questions.length === 0}
-              className={`w-full bg-gradient-to-r from-orange-600 via-orange-500 to-emerald-500 hover:shadow-2xl hover:shadow-orange-500/30 text-white font-bold py-6 rounded-2xl text-xl transition-all flex items-center justify-center gap-3 active:scale-95 group ${loading || questions.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`w-full bg-emerald-600 hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-500/20 text-white font-bold py-3 rounded-lg text-base transition-all flex items-center justify-center gap-2 active:scale-95 group ${loading || questions.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {loading ? (
                 <>
-                  <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                  Loading Questions...
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Loading...
                 </>
               ) : (
                 <>
-                  Start Quiz <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                  Start Quiz <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </button>
@@ -282,57 +290,57 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
     const stars = Math.ceil((score / 5) * 5);
 
     return (
-      <div className="min-h-screen bg-white dark:bg-slate-950 pt-32 pb-12 transition-colors duration-300">
+      <div className="min-h-screen bg-white dark:bg-slate-950 pt-20 pb-12 transition-colors duration-300">
         <div className="max-w-xl mx-auto px-4 text-center">
-          <div className="mb-8 flex justify-center animate-in bounce-in duration-700">
-            <div className="w-24 h-24 rounded-full bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center shadow-inner border-4 border-white dark:border-slate-800">
-              <Trophy className="w-12 h-12 text-orange-500" />
+          <div className="mb-4 flex justify-center animate-in bounce-in duration-700">
+            <div className="w-16 h-16 rounded-full bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center shadow-inner border-2 border-white dark:border-slate-800">
+              <Trophy className="w-8 h-8 text-orange-500" />
             </div>
           </div>
 
-          <h1 className="text-5xl font-extrabold text-slate-900 dark:text-white mb-3">
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">
             {score === 5 ? 'Excellent!' : isGoodScore ? 'Well Done!' : 'Good Try!'}
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-xl font-medium mb-12">
+          <p className="text-slate-500 dark:text-slate-400 text-base font-medium mb-6">
             You scored {score} out of 5
           </p>
 
-          <div className="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 rounded-[3rem] p-10 mb-10">
+          <div className="bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 rounded-2xl p-6 mb-6">
             {/* Attempt Bubbles (Image 2) */}
-            <div className="flex justify-center gap-4 mb-8">
+            <div className="flex justify-center gap-2 mb-4">
               {attempts.map((isCorrect, idx) => (
-                <div key={idx} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isCorrect
-                  ? 'bg-emerald-50 text-emerald-600 border-2 border-emerald-100 shadow-sm'
-                  : 'bg-red-50 text-red-600 border-2 border-red-100 shadow-sm'
+                <div key={idx} className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isCorrect
+                  ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                  : 'bg-red-50 text-red-600 border border-red-100'
                   }`}>
-                  {isCorrect ? <CheckCircle className="w-7 h-7" /> : <XCircle className="w-7 h-7" />}
+                  {isCorrect ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
                 </div>
               ))}
             </div>
 
             {/* Stars (Image 2) */}
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <Sparkles
                   key={star}
-                  className={`w-10 h-10 transition-all ${star <= score
-                    ? 'text-yellow-400 fill-yellow-400 scale-110'
+                  className={`w-6 h-6 transition-all ${star <= score
+                    ? 'text-yellow-400 fill-yellow-400'
                     : 'text-slate-200 dark:text-slate-800'}`}
                 />
               ))}
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleRetry}
-              className="flex-1 border-2 border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300 font-bold py-5 rounded-3xl flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95"
+              className="flex-1 border-2 border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95"
             >
-              <RotateCcw className="w-5 h-5" /> Try Again
+              <RotateCcw className="w-4 h-4" /> Try Again
             </button>
             <button
               onClick={() => { setSelectedTopic(null); setQuizState('topics'); }}
-              className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold py-5 rounded-3xl shadow-xl shadow-teal-500/20 hover:shadow-2xl transition-all active:scale-95"
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-600/20 hover:shadow-xl transition-all active:scale-95"
             >
               Learn More
             </button>
@@ -345,7 +353,7 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
   // Safety check - if no questions loaded yet, show loading
   if (quizState === 'playing' && (loading || questions.length === 0)) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-32 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400 font-bold">Loading questions...</p>
@@ -367,21 +375,21 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
           </span>
           <span className="text-slate-500 dark:text-slate-400 font-extrabold font-mono">Score: {score}</span>
         </div>
-        <div className="w-full h-3 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+        <div className="w-full h-4 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
           <div
-            className="h-full bg-gradient-to-r from-teal-400 to-cyan-500 transition-all duration-700 ease-out"
-            style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
+            className="h-full bg-emerald-500 transition-all duration-700 ease-out"
+            style={{ width: `${((currentIndex + (selectedOptionId ? 1 : 0)) / questions.length) * 100}%` }}
           />
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 mt-8 pb-32">
         {/* Question Card (Image 1) */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200/50 dark:shadow-none mb-8 transition-all">
-          <h2 className="text-slate-900 dark:text-white text-2xl md:text-3xl font-extrabold font-kannada mb-4 leading-tight">
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-[2rem] p-6 shadow-xl shadow-slate-200/50 dark:shadow-none mb-6 transition-all">
+          <h2 className="text-slate-900 dark:text-white text-xl md:text-2xl font-extrabold font-kannada mb-3 leading-snug">
             {currentQuestion.question_kannada}
           </h2>
-          <p className="text-slate-400 dark:text-slate-500 font-medium text-base italic border-l-4 border-slate-100 dark:border-slate-800 pl-4">
+          <p className="text-slate-400 dark:text-slate-500 font-medium text-sm italic border-l-2 border-slate-100 dark:border-slate-800 pl-3">
             {currentQuestion.question_english || "What is the correct syntax for this operation?"}
           </p>
         </div>
@@ -415,14 +423,14 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
                 key={option.id}
                 onClick={() => handleSelectAnswer(option.id)}
                 disabled={hasAnswered}
-                className={`w-full group flex items-center justify-between p-4 rounded-[1.5rem] border-2 transition-all duration-300 shadow-sm hover:shadow-xl ${borderClass} ${bgClass} active:scale-[0.98]`}
+                className={`w-full group flex items-center justify-between p-3 rounded-2xl border transition-all duration-300 shadow-sm hover:shadow-md ${borderClass} ${bgClass} active:scale-[0.99]`}
               >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg shadow-inner transition-colors ${isSelected ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 scale-105' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-base shadow-sm transition-colors ${isSelected ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                     }`}>
                     {letter}
                   </div>
-                  <span className="text-slate-800 dark:text-slate-200 text-lg font-bold font-kannada text-left">{option.option_text_kannada}</span>
+                  <span className="text-slate-800 dark:text-slate-200 text-base font-semibold font-kannada text-left">{option.option_text_kannada}</span>
                 </div>
                 {statusIcon}
               </button>
@@ -436,10 +444,10 @@ const QuizPage = ({ onBack, onNavigateToLeaderboard }) => {
             <div className="max-w-4xl mx-auto flex justify-end">
               <button
                 onClick={handleNext}
-                className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3 rounded-[1.5rem] font-bold text-lg flex items-center gap-2 hover:scale-105 transition-all shadow-xl active:scale-95 group"
+                className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold text-base flex items-center gap-2 hover:scale-105 transition-all shadow-lg active:scale-95 group"
               >
-                {currentIndex === questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                {currentIndex === questions.length - 1 ? 'Finish Quiz' : 'Next'}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
@@ -454,17 +462,12 @@ const TopicCard = ({ topic, onSelect }) => {
   return (
     <button
       onClick={() => onSelect(topic)}
-      className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 w-full overflow-hidden"
+      className="group relative bg-white dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border-2 border-slate-200 dark:border-white/50 rounded-3xl p-8 shadow-xl dark:shadow-none hover:shadow-2xl dark:hover:shadow-none transition-all duration-300 transform hover:-translate-y-2 w-full overflow-hidden"
     >
-      {/* Background Gradient on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-600 to-teal-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
       <div className="relative z-10 flex flex-col items-center">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-600 to-teal-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-          <Sparkles className="w-8 h-8 text-white" />
-        </div>
-        <h3 className="text-slate-900 dark:text-white group-hover:text-white text-2xl font-bold text-center font-kannada mb-2">{topic.titleKannada}</h3>
-        <p className="text-cyan-600 dark:text-cyan-400 group-hover:text-white/80 text-sm font-medium">{topic.titleEnglish}</p>
+
+        <h3 className="text-slate-900 dark:text-white group-hover:text-black dark:group-hover:text-white text-2xl font-bold text-center font-kannada mb-2">{topic.titleKannada}</h3>
+        <p className="text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300 text-sm font-medium">{topic.titleEnglish}</p>
       </div>
     </button>
   );

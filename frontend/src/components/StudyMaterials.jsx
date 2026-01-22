@@ -85,7 +85,7 @@ const StudyMaterials = ({ onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-4 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pt-20 pb-12 px-4 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
         <button

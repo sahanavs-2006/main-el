@@ -14,10 +14,10 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
   const [currentStep, setCurrentStep] = useState('');
 
   const varnamalaRows = [
-    ['ಕ', 'ಖ', 'ಗ', 'ಘ', 'ಚ', 'ಛ', 'ಜ', 'ಝ', 'ಞ', 'ಟ'],
-    ['ಠ', 'ಡ', 'ಢ', 'ಣ', 'ತ', 'ಥ', 'ದ', 'ಧ', 'ನ', 'ಪ'],
-    ['ಫ', 'ಬ', 'ಭ', 'ಮ', 'ಯ', 'ರ', 'ಲ', 'ವ', 'ಶ', 'ಷ'],
-    ['ಸ', 'ಹ', 'ಳ', 'ೞ', 'ಱ']
+    ['ಅ', 'ಆ', 'ಇ', 'ಈ', 'ಉ', 'ಊ', 'ಋ', 'ಎ', 'ಏ', 'ಐ', 'ಒ', 'ಓ', 'ಔ', 'ಅಂ', 'ಅಃ'],
+    ['ಕ', 'ಖ', 'ಗ', 'ಘ', 'ಙ', 'ಚ', 'ಛ', 'ಜ', 'ಝ', 'ಞ', 'ಟ', 'ಠ', 'ಡ', 'ಢ', 'ಣ'],
+    ['ತ', 'ಥ', 'ದ', 'ಧ', 'ನ', 'ಪ', 'ಫ', 'ಬ', 'ಭ', 'ಮ', 'ಯ', 'ರ', 'ಲ', 'ವ', 'ಶ'],
+    ['ಷ', 'ಸ', 'ಹ', 'ಳ', 'ೞ', 'ಱ']
   ];
 
   const numbersRows = [
@@ -105,52 +105,65 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
       setCurrentStep('ಕನ್ನಡವನ್ನು ಇಂಗ್ಲಿಷ್‌ಗೆ ಅನುವಾದಿಸುತ್ತಿದೆ...');
       setProcessingSteps([{ step: 1, name: 'ಅನುವಾದ', status: 'processing' }]);
 
-      const t = await apiService.translateKannada(kannadaInput);
-      let translatedEnglish = t.data?.english || '';
+      let translatedEnglish = '';
+      let code = '';
 
-      setProcessingSteps([{ step: 1, name: 'ಅನುವಾದ', status: 'complete' }]);
+      try {
+        // Attempt real API calls
+        const response = await apiService.fullPipeline(kannadaInput, false);
+        const data = response.data || {};
 
-      // Step 2: Code Generation
-      setCurrentStep('Python ಕೋಡ್ ರಚಿಸುತ್ತಿದೆ...');
-      setProcessingSteps(prev => [...prev, { step: 2, name: 'ಕೋಡ್ ರಚನೆ', status: 'processing' }]);
+        if (data.status === 'error' || data.error || data.error_kannada) {
+          throw new Error(data.error_kannada || data.error || "Processing failed");
+        }
 
-      const response = await apiService.fullPipeline(kannadaInput, false);
-      const data = response.data || {};
-      const code = data.generated_code || data.python_code;
+        translatedEnglish = data.english_description || "";
+        code = data.generated_code || data.python_code || "";
 
-      // Use pipeline's English if available, otherwise use standalone translation
-      if (data.english_description) {
-        translatedEnglish = data.english_description;
+        setProcessingSteps([{ step: 1, name: 'ಅನುವಾದ', status: 'complete' }]);
+
+        if (!code && !translatedEnglish) {
+          throw new Error("ಸರ್ವರ್ ಯಾವುದೇ ಡೇಟಾವನ್ನು ಹಿಂತಿರುಗಿಸಿಲ್ಲ (Server returned no data)");
+        }
+
+        setCurrentStep('ಪೂರ್ಣಗೊಂಡಿದೆ! ✓');
+        setProcessingSteps(prev => [...prev, { step: 2, name: 'ಕೋಡ್ ರಚನೆ', status: 'complete' }]);
+
+      } catch (apiError) {
+        console.error("Pipeline API Error:", apiError);
+        const errorMessage = apiError.response?.data?.error_kannada ||
+          apiError.response?.data?.error ||
+          apiError.message ||
+          "ಸರ್ವರ್ ಸಂಪರ್ಕ ವಿಫಲವಾಗಿದೆ (Server connection failed)";
+        throw new Error(errorMessage);
       }
 
-      if (code && code.trim()) {
+      // Finalize Code Setting
+      if (code) {
         setPythonCode(code);
         setProcessingSteps(prev => prev.map(s => s.step === 2 ? { ...s, status: 'complete' } : s));
       } else {
-        // Fallback: Generate code from English translation
-        const gen = await apiService.generateCode(translatedEnglish || kannadaInput);
-        const fallbackCode = gen.data?.generated_code;
-        setPythonCode(
-          (fallbackCode && fallbackCode.trim()) ? fallbackCode : "# Translation/generation unavailable right now.\nprint('Please try again later.')\n"
-        );
-        setProcessingSteps(prev => prev.map(s => s.step === 2 ? { ...s, status: 'complete' } : s));
+        // Fallback if even logic fails (extremely unlikely)
+        setPythonCode("# Could not generate code.\nprint('Please try again.')");
+        setProcessingSteps(prev => prev.map(s => s.step === 2 ? { ...s, status: 'error' } : s));
       }
 
       // Step 3: Complete
       setCurrentStep('ಪೂರ್ಣಗೊಂಡಿದೆ! ✓');
       setProcessingSteps(prev => [...prev, { step: 3, name: 'ಪೂರ್ಣಗೊಂಡಿದೆ', status: 'complete' }]);
 
-      // Always notify parent with both Kannada and English translation
-      console.log('Algorithm data to notify:', { kannada: kannadaInput, english: translatedEnglish });
-      setEnglishTranslation(translatedEnglish); // Store in local state
+      // Notify parent
+      console.log('Algorithm data:', { kannada: kannadaInput, english: translatedEnglish });
+      setEnglishTranslation(translatedEnglish);
       if (onAlgorithmTranslated) {
         onAlgorithmTranslated(kannadaInput, translatedEnglish);
       }
+
     } catch (err) {
-      const msg = err.response?.data?.error_kannada || err.response?.data?.error || 'Translation failed';
+      const msg = err.message || 'Translation failed';
       setError(msg);
       setProcessingSteps(prev => prev.map(s => s.status === 'processing' ? { ...s, status: 'error' } : s));
-      console.error('Translation error:', err);
+      console.error('Process error:', err);
     } finally {
       setLoading(false);
       setTimeout(() => {
@@ -167,17 +180,10 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-28 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="mb-6 flex items-center justify-between">
-          <button
-            onClick={onBack}
-            disabled={loading}
-            className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            ← ಹಿಂತಿರುಗಿ
-          </button>
-          <h1 className="font-kannada text-2xl md:text-3xl font-bold text-slate-900 dark:text-white drop-shadow-sm">
+        <div className="mb-6 flex items-center justify-center relative">
+          <h1 className="font-kannada text-2xl md:text-3xl font-bold text-slate-900 dark:text-white drop-shadow-sm text-center">
             ಕನ್ನಡ ಅಲ್ಗಾರಿದಮ್: ಬರೆಯಿರಿ ಅಥವಾ ಮಾತನಾಡಿ
           </h1>
         </div>
@@ -186,26 +192,26 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
         {loading && processingSteps.length > 0 && (
           <div className="mb-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-teal-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden transition-colors duration-300">
             <h3 className="font-kannada text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              <span className="animate-spin text-teal-500 dark:text-teal-400">⚙️</span>
+              <span className="animate-spin text-slate-500 dark:text-slate-400">⚙️</span>
               <span>{currentStep}</span>
             </h3>
             <div className="space-y-3">
               {processingSteps.map((step) => (
                 <div key={step.step} className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step.status === 'complete' ? 'bg-green-500' :
-                    step.status === 'processing' ? 'bg-blue-500 animate-pulse' :
-                      step.status === 'error' ? 'bg-red-500' :
-                        'bg-slate-600'
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step.status === 'complete' ? 'bg-emerald-500 text-white' :
+                    step.status === 'processing' ? 'bg-emerald-500 animate-pulse text-white' :
+                      step.status === 'error' ? 'bg-red-500 text-white' :
+                        'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                     }`}>
                     {step.status === 'complete' ? '✓' :
                       step.status === 'error' ? '✗' :
                         step.step}
                   </div>
-                  <div className="flex-1">
-                    <div className="text-white font-kannada">{step.name}</div>
+                  <div className="flex-1 pl-1">
+                    <div className="text-slate-900 dark:text-white font-kannada text-base leading-relaxed">{step.name}</div>
                     {step.status === 'processing' && (
-                      <div className="w-full bg-slate-700 rounded-full h-1.5 mt-1">
-                        <div className="bg-blue-400 h-1.5 rounded-full animate-pulse" style={{ width: '70%' }}></div>
+                      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 mt-1">
+                        <div className="bg-emerald-500 h-1.5 rounded-full animate-pulse" style={{ width: '70%' }}></div>
                       </div>
                     )}
                   </div>
@@ -224,13 +230,13 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
               <textarea
                 value={kannadaInput}
                 onChange={(e) => setKannadaInput(e.target.value)}
-                className="w-full h-40 p-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 font-kannada text-lg resize-none text-slate-900 dark:text-white placeholder-slate-400 transition-all"
+                className="w-full h-40 p-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500 font-kannada text-lg resize-none text-slate-900 dark:text-white placeholder-slate-400 transition-all"
                 placeholder="ಇಲ್ಲಿ ಕನ್ನಡದಲ್ಲಿ ಬರೆಯಿರಿ..."
               />
               <button
                 onClick={handleTranslate}
                 disabled={loading}
-                className="w-full mt-4 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-800 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-teal-600/20 transition-all active:scale-95"
+                className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-700 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
               >
                 {loading ? 'ಸಂಸ್ಕರಿಸುತ್ತಿದೆ...' : '🚀 Generate & Execute Code'}
               </button>
@@ -317,7 +323,7 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
                     </button>
                     <button
                       onClick={handleTranslate}
-                      className="min-w-[3.5rem] h-11 bg-teal-600 hover:bg-teal-700 border border-teal-700 rounded-lg text-xl flex items-center justify-center transition-colors text-white"
+                      className="min-w-[3.5rem] h-11 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-lg text-xl flex items-center justify-center transition-colors text-slate-700 dark:text-white"
                     >
                       ↵
                     </button>
@@ -329,7 +335,7 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
             {!showKeyboard && (
               <button
                 onClick={() => setShowKeyboard(true)}
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-cyan-600 dark:text-cyan-400 font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl shadow-lg transition-all active:scale-95"
               >
                 ಕೀಬೋರ್ಡ್ ತೋರಿಸಿ (Show Keyboard)
               </button>
@@ -339,7 +345,7 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
           <div className="space-y-4">
             <button
               onClick={() => onNavigateToExecution('# Write your Python code here\n', '')}
-              className="w-full bg-gradient-to-r from-teal-600 to-cyan-700 hover:from-teal-700 hover:to-cyan-800 text-white font-bold py-4 rounded-2xl text-lg transition-all shadow-xl shadow-cyan-600/20 flex items-center justify-center gap-3 active:scale-95"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl text-lg transition-all shadow-xl shadow-emerald-600/20 flex items-center justify-center gap-3 active:scale-95"
             >
               <span>💻</span>
               <span className="font-kannada">ನೇರವಾಗಿ ಕೋಡ್ ಬರೆಯಿರಿ (Write Code Directly)</span>
@@ -356,14 +362,14 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
                 {pythonCode ? (
                   <>
                     <div className="space-y-2">
-                      <p className="font-kannada text-cyan-600 dark:text-yellow-400 font-bold">ಕನ್ನಡ ಇನ್‌ಪುಟ್ (Input):</p>
+                      <p className="font-kannada text-slate-600 dark:text-slate-400 font-bold">ಕನ್ನಡ ಇನ್‌ಪುಟ್ (Input):</p>
                       <p className="font-kannada text-slate-800 dark:text-white text-lg lg:text-xl">
                         {kannadaInput}
                       </p>
                     </div>
                     {englishTranslation && (
                       <div className="border-t border-slate-200 dark:border-slate-800 pt-3">
-                        <p className="text-teal-600 dark:text-cyan-400 font-bold mb-2 font-sans tracking-wide">English Translation:</p>
+                        <p className="text-slate-600 dark:text-slate-400 font-bold mb-2 font-sans tracking-wide">English Translation:</p>
                         <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
                           {englishTranslation}
                         </p>
@@ -393,7 +399,7 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
                         <div key={i} className="leading-6">{i + 1}</div>
                       ))}
                     </div>
-                    <pre className="text-teal-600 dark:text-green-400 text-sm flex-1 whitespace-pre-wrap leading-6">
+                    <pre className="text-slate-800 dark:text-slate-200 text-sm flex-1 whitespace-pre leading-6">
                       {pythonCode}
                     </pre>
                   </div>
@@ -405,14 +411,10 @@ const ConverterPage = ({ onBack, onNavigateToExecution, onAlgorithmTranslated })
               </div>
               {pythonCode && (
                 <div className="mt-3 space-y-3">
-                  <div className="flex gap-4 text-sm text-slate-400">
-                    <span>✓ Lines: {pythonCode.split('\n').length}</span>
-                    <span>✓ Language: Python</span>
-                    <span>✓ Status: Ready</span>
-                  </div>
+
                   <button
                     onClick={() => onNavigateToExecution(pythonCode, kannadaInput)}
-                    className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-kannada py-3 rounded-lg font-semibold text-lg transition-all shadow-xl flex items-center justify-center gap-2"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-kannada py-3 rounded-lg font-semibold text-lg transition-all shadow-xl flex items-center justify-center gap-2"
                   >
                     <span>▶</span>
                     <span>ಕೋಡ್ ಚಲಾಯಿಸಿ (Run Code)</span>

@@ -9,11 +9,15 @@ const api = axios.create({
   },
 });
 
-// Add token to requests if it exists
+// Add token to requests if it exists, except for auth endpoints
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Token ${token}`;
+  const isAuthEndpoint = config.url.includes('/auth/login/') || config.url.includes('/auth/register/') || config.url.includes('/auth/send-otp/') || config.url.includes('/auth/verify-otp/');
+
+  if (!isAuthEndpoint) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Token ${token}`;
+    }
   }
   return config;
 });

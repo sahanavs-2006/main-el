@@ -75,7 +75,7 @@ const Leaderboard = ({ onBack }) => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-4 transition-colors duration-300">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 pb-12 px-4 transition-colors duration-300">
             <div className="max-w-6xl mx-auto">
                 {/* Back Button */}
                 <button
@@ -129,8 +129,8 @@ const Leaderboard = ({ onBack }) => {
                             key={cat.value}
                             onClick={() => setSelectedCategory(cat.value)}
                             className={`px-4 py-2 rounded-xl font-kannada font-semibold transition-all ${selectedCategory === cat.value
-                                    ? 'bg-gradient-to-r from-cyan-500 to-teal-600 text-white shadow-lg scale-105'
-                                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                ? 'bg-gradient-to-r from-cyan-500 to-teal-600 text-white shadow-lg scale-105'
+                                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                                 }`}
                         >
                             {cat.icon} {cat.label}
@@ -182,8 +182,8 @@ const Leaderboard = ({ onBack }) => {
                                         </td>
                                         <td className="px-6 py-4 text-center">
                                             <span className={`px-3 py-1 rounded-full text-sm font-semibold ${entry.accuracy >= 80 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                                    entry.accuracy >= 60 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                                        'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                                entry.accuracy >= 60 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                                    'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                                 }`}>
                                                 {entry.accuracy}%
                                             </span>

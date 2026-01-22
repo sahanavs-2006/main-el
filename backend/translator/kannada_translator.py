@@ -25,7 +25,25 @@ class KannadaTranslator:
             return ""
         
         try:
-            result = self.kannada_to_english.translate(text)
+            if '\n' in text:
+                logger.info("Multi-line text detected, translating line by line")
+                lines = text.split('\n')
+                translated_lines = []
+                for line in lines:
+                    if line.strip():
+                        try:
+                            # Translate each line individually to preserve structure
+                            trans = self.kannada_to_english.translate(line)
+                            translated_lines.append(trans if trans else line)
+                        except Exception as line_err:
+                            logger.error(f"Error translating line '{line[:20]}': {line_err}")
+                            translated_lines.append(line)
+                    else:
+                        translated_lines.append('')
+                result = '\n'.join(translated_lines)
+            else:
+                result = self.kannada_to_english.translate(text)
+            
             logger.info(f"Translated: {text[:50]} -> {result[:50]}")
             return result
         except Exception as e:

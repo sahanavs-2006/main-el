@@ -88,14 +88,28 @@ class TextPreprocessor:
         """
         Remove excessive whitespace and normalize to single spaces
         """
-        # Replace multiple spaces with single space
-        text = re.sub(r'\s+', ' ', text)
+        # Split by newlines first to preserve line structure
+        lines = text.split('\n')
         
-        # Remove leading/trailing whitespace from each line
-        lines = [line.strip() for line in text.split('\n')]
-        text = ' '.join(line for line in lines if line)
+        # Normalize whitespace within each line but PRESERVE indentation
+        cleaned_lines = []
+        for line in lines:
+            if not line.strip():
+                continue
+                
+            # Capture indentation
+            match = re.match(r'^(\s*)', line)
+            indentation = match.group(1) if match else ''
+            
+            # Normalize content (strip leading/trailing, collapse internal spaces)
+            content = line.strip()
+            cleaned_content = re.sub(r'[ \t]+', ' ', content)
+            
+            # Reconstruct line with original indentation
+            cleaned_lines.append(indentation + cleaned_content)
         
-        return text
+        # Join back with newlines
+        return '\n'.join(cleaned_lines)
     
     def remove_special_characters(self, text):
         """

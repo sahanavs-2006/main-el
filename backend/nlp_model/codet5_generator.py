@@ -39,6 +39,42 @@ class CodeT5Generator:
         if not description or not description.strip():
             return {'error': 'Empty description', 'code': ''}
             
+        # Handle multi-line descriptions (e.g. from file input) line-by-line
+        if '\n' in description:
+            lines = description.split('\n')
+            code_lines = []
+            
+            for line in lines:
+                # Preserve indentation
+                match = re.match(r'^(\s*)', line)
+                indent = match.group(1) if match else ''
+                
+                content = line.strip()
+                if not content:
+                    code_lines.append('')
+                    continue
+                    
+                # Generate code for this line (recursive)
+                # Pass a flag or ensure we don't recurse infinitely
+                result = self.generate_code(content, max_length)
+                
+                if result.get('code'):
+                    # Add indent back to generated code (handle multi-line generation for single line input if any)
+                    gen_lines = result['code'].split('\n')
+                    indented_gen = [indent + gl for gl in gen_lines]
+                    code_lines.append('\n'.join(indented_gen))
+                elif result.get('error'):
+                    # Fallback: keep original if generation fails
+                    code_lines.append(indent + "# " + content)
+            
+            final_code = '\n'.join(code_lines)
+            return {
+                'code': final_code,
+                'description': description,
+                'model': self.hf_repo_id,
+                'status': 'success'
+            }
+            
         enhanced_description = f"Translate English to Python: {description}"
         generated_text = ""
         

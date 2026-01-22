@@ -10,6 +10,7 @@ import StudyMaterials from './components/StudyMaterials';
 import LoginPage from './components/LoginPage';
 import AboutPage from './components/AboutPage';
 import Leaderboard from './components/Leaderboard';
+import TutorialsPage from './components/TutorialsPage';
 import Footer from './components/Footer';
 
 function App() {
@@ -53,7 +54,7 @@ function App() {
     setPage('execution');
   };
 
-  const contentPadding = (page === 'home' || page === 'login' || page === 'dashboard') ? '' : 'pt-28'; // offset for fixed navbar
+  const contentPadding = (page === 'home' || page === 'login' || page === 'dashboard' || page === 'about' || page === 'quiz' || page === 'leaderboard' || page === 'converter' || page === 'materials' || page === 'execution' || page === 'tutorials') ? '' : 'pt-28'; // offset for fixed navbar
 
   if (page === 'login') {
     return (
@@ -82,6 +83,7 @@ function App() {
           <Dashboard
             onNavigateToConverter={() => setPage('converter')}
             onNavigateToQuiz={() => setPage('quiz')}
+            onNavigateToTutorials={() => setPage('tutorials')}
             onNavigateToMaterials={() => setPage('materials')}
             onNavigateToNotes={() => setPage('notes')}
             onNavigateToAbout={() => setPage('about')}
@@ -97,15 +99,24 @@ function App() {
           />
         ) : page === 'leaderboard' ? (
           <Leaderboard onBack={() => setPage('quiz')} />
+        ) : page === 'tutorials' ? (
+          <TutorialsPage
+            onBack={() => setPage('dashboard')}
+            onTryCode={(code) => {
+              setExecutionData({ code: code || '', input: '', showTerminal: true, fromTutorials: true });
+              setPage('execution');
+            }}
+          />
         ) : page === 'materials' ? (
           <StudyMaterials onBack={() => setPage('dashboard')} />
         ) : page === 'notes' ? (
           <div className="p-8 text-center text-slate-500">Notes Page (Coming Soon)</div>
         ) : page === 'execution' ? (
           <CodeExecutionPage
-            onBack={() => setPage('converter')}
+            onBack={() => setPage(executionData.fromTutorials ? 'tutorials' : 'converter')}
             initialCode={executionData.code}
             kannadaInput={executionData.input}
+            defaultShowTerminal={executionData.showTerminal}
           />
         ) : (
           <ConverterPage

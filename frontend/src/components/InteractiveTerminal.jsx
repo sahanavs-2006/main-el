@@ -11,7 +11,8 @@ export default function InteractiveTerminal({ code, onClose }) {
 
   useEffect(() => {
     // Connect to WebSocket
-    const ws = new WebSocket('ws://localhost:8000/ws/execute/');
+    const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+    const ws = new WebSocket(`${WS_URL}/ws/execute/`);
     wsRef.current = ws;
 
     ws.onopen = () => {
