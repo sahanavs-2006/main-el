@@ -3,10 +3,12 @@ djangorestframework==3.14.0
 django-cors-headers==4.0.0
 python-dotenv==1.0.0
 deep-translator==1.11.4
-transformers==4.30.0
+# Updated libraries to fix deployment build errors
+transformers>=4.37.0
+huggingface-hub>=0.20.0
+tokenizers>=0.15.0
+# Core
 torch
-
-huggingface-hub==0.16.1
 requests==2.31.0
 google-auth==2.23.0
 google-auth-oauthlib==1.1.0
